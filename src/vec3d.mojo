@@ -82,8 +82,8 @@ struct Vec3D[T: DType = DType.float64]:
         The items are then sorted based on the translation distance.
 
         Returns:
-            An Optional Vec3D representing the reflexion angle
-                and the location of the intersection.
+            An Optional Vec3D representing closest vector and the
+                dot product of self.qr with closest.qr.
         """
         # FIXME: This might cause artifacts for coords around
         # the origin.
