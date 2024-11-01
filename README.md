@@ -8,9 +8,9 @@ This is a hobby project trying to setup a Physics engine in Mojo using Quaternio
 - Ray tracing with specular, diffusion, and refraction is available using `Surface.raycast(ray: Ray)` where Ray is a Vec3D plus a light intensity component.
 - Bounding volume calculation is as simple as doing 
 ```mojo
-var vol = RigidVolume()
-var center = vol.center_of_mass()
-var radius = center.furthest(vol.surface.vecs)
+vol = RigidVolume()
+center = vol.center_of_mass()
+radius = center.furthest(vol.surface.vecs)
 ```
 
 ### Structures

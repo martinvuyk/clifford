@@ -1,1 +1,0 @@
-I wrote this code myself, but I'm trying to get it into de Mojo standard library, so I'll leave this here with Modular's licence to avoid conflicts.

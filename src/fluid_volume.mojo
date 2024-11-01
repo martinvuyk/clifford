@@ -1,4 +1,4 @@
-from complex_2 import Quaternion
+from forge_tools.complex import Quaternion
 
 from surface import Surface
 from vec3d import Vec3D
@@ -76,3 +76,11 @@ struct FluidVolume[T: DType]:
         var u2 = self.velocity.qt.vec * divergence * self.velocity.qt.vec
         var q = Quaternion[T](f.qt.vec + v_div2_u - (div_p_over_rho + u2))
         return Vec3D[T](q.normalized(), q)
+
+    # TODO: Hagen–Poiseuille equation for flow through pipe
+    # fn flow(self):
+    #     ...
+
+    # TODO: Shallow water equations
+    # fn recieve_impact(self) -> Self:
+    #     ...

@@ -1,6 +1,6 @@
 from math import sqrt
 
-from complex_2 import Quaternion
+from forge_tools.complex import Quaternion
 from vec3d import Vec3D, Ray
 
 
@@ -40,44 +40,44 @@ struct Surface[T: DType]:
                 and the diffuse reflectance intensity.
         """
         alias tu = Tuple[Ray[T], Optional[Ray[T]], Scalar[T]]
-        var res = ray.vec.intersect(self.vecs)
+        res = ray.vec.intersect(self.vecs)
         if not res:
             return tu(ray, None, 0)
-        var inters = res.value()
+        inters = res.value()
 
-        var rot = ray.vec.qr.vec - 2 * (inters.dot_n) * inters.vec.qr.vec
-        var specular_reflection = Vec3D(
+        rot = ray.vec.qr.vec - 2 * (inters.dot_n) * inters.vec.qr.vec
+        specular_reflection = Vec3D(
             Quaternion[T](rot), inters.vec.qt, ray.vec.color * inters.vec.color
         )
-        var diffuse_reflectance = (
+        diffuse_reflectance = (
             self.diffuse_reflectivity * ray.light_intensity * inters.dot_n
         )
-        var n_r = prev_refraction_idx / self.refraction_index
-        var sin_out = (n_r**2) * (1.0 - inters.dot_n**2)
+        n_r = prev_refraction_idx / self.refraction_index
+        sin_out = (n_r**2) * (1.0 - inters.dot_n**2)
         if sin_out < 1:
-            var cos_out = sqrt(1.0 - sin_out)
-            var norm_prod = (n_r * -inters.dot_n - cos_out) * ray.vec.qt.vec
-            var refr = (n_r * ray.vec.qt.vec + norm_prod)
-            var refraction = Vec3D(
+            cos_out = sqrt(1.0 - sin_out)
+            norm_prod = (n_r * -inters.dot_n - cos_out) * ray.vec.qt.vec
+            refr = n_r * ray.vec.qt.vec + norm_prod
+            refraction = Vec3D(
                 Quaternion[T](refr),
                 inters.vec.qt,
                 ray.vec.color * inters.vec.color,
             )
-            var delta_reflectance = ray.light_intensity - diffuse_reflectance
-            var r0 = (
+            delta_reflectance = ray.light_intensity - diffuse_reflectance
+            r0 = (
                 (prev_refraction_idx - self.refraction_index)
                 / (prev_refraction_idx + self.refraction_index)
             ) ** 2
-            var r_phi = r0 + (1 - r0) * (1 + inters.dot_n) ** 5
-            var refl_intensity = delta_reflectance * r_phi
-            var refr_intensity = delta_reflectance - refl_intensity
+            r_phi = r0 + (1 - r0) * (1 + inters.dot_n) ** 5
+            refl_intensity = delta_reflectance * r_phi
+            refr_intensity = delta_reflectance - refl_intensity
             return tu(
                 Ray(specular_reflection, refl_intensity),
                 Ray(refraction, refr_intensity),
                 diffuse_reflectance,
             )
         # Total Internal Reflection
-        var refl_intensity = ray.light_intensity - diffuse_reflectance
+        refl_intensity = ray.light_intensity - diffuse_reflectance
         return tu(
             Ray(specular_reflection, refl_intensity), None, diffuse_reflectance
         )

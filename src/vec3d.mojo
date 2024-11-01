@@ -3,7 +3,7 @@
 
 from math import sqrt
 
-from complex_2.quaternion import Quaternion
+from forge_tools.complex.quaternion import Quaternion
 
 
 @value
@@ -87,17 +87,17 @@ struct Vec3D[T: DType = DType.float64]:
         """
         # FIXME: This might cause artifacts for coords around
         # the origin.
-        var magn_ray_x2 = self.qt.__abs__() * 2
+        magn_ray_x2 = self.qt.__abs__() * 2
 
-        var closest_vec = values[0]
-        var closest_vec_angle_dot: Scalar[T] = 0
-        var closest_dist = Scalar[T].MAX_FINITE
+        closest_vec = values[0]
+        closest_vec_angle_dot: Scalar[T] = 0
+        closest_dist = Scalar[T].MAX_FINITE
         for i in values:
-            var item = (self.qr.vec * i[].qr.vec).reduce_add()
+            item = (self.qr.vec * i[].qr.vec).reduce_add()
             if item < 0:
                 # make a parabola around the distance to the ray
-                var dot = (self.qt.vec * i[].qt.vec).reduce_add()
-                var dist = ((dot) / magn_ray_x2 - 1) ** 2
+                dot = (self.qt.vec * i[].qt.vec).reduce_add()
+                dist = ((dot) / magn_ray_x2 - 1) ** 2
                 if dist < closest_dist:
                     closest_dist = dist
                     closest_vec = i[]
@@ -115,9 +115,9 @@ struct Vec3D[T: DType = DType.float64]:
         Returns:
             The orthogonal vectors.
         """
-        var items = List[Self]()
+        items = List[Self]()
         for i in values:
-            var item = (self.qr.vec * i[].qr.vec).reduce_add()
+            item = (self.qr.vec * i[].qr.vec).reduce_add()
             if item == 0:
                 items.append(i[])
         return items
@@ -133,7 +133,7 @@ struct Vec3D[T: DType = DType.float64]:
             The orthogonal vectors.
         """
 
-        var items = List[Self]()
+        items = List[Self]()
         for i in values:
             if self.qt.i == i[].qt.i and self.qt.j == i[].qt.j:
                 items.append(i[])
@@ -148,7 +148,7 @@ struct Vec3D[T: DType = DType.float64]:
         Returns:
             The orthogonal vectors.
         """
-        var items = List[Self]()
+        items = List[Self]()
         for i in values:
             if self.qt.k == i[].qt.k:
                 items.append(i[])
@@ -164,8 +164,8 @@ struct Vec3D[T: DType = DType.float64]:
         Returns:
             The average coordinate of the vectors.
         """
-        var avg = Vec3D[T](0, 0, 0)
-        var amnt = 0
+        avg = Vec3D[T](0, 0, 0)
+        amnt = 0
         for vec in values:
             amnt += 1
             avg.qr.vec += vec[].qr.vec
@@ -196,18 +196,18 @@ struct Vec3D[T: DType = DType.float64]:
             The new coordinate system.
         """
 
-        var ort = self.orthogonal(values)
-        var center = Self.center(ort)
-        var furthest_pos_vec = values[0]
-        var furthest_pos_vec_dist: Scalar[T] = 0
-        var furthest_neg_vec = values[0]
-        var furthest_neg_vec_dist: Scalar[T] = 0
+        ort = self.orthogonal(values)
+        center = Self.center(ort)
+        furthest_pos_vec = values[0]
+        furthest_pos_vec_dist: Scalar[T] = 0
+        furthest_neg_vec = values[0]
+        furthest_neg_vec_dist: Scalar[T] = 0
 
         for i in values:
-            var item = (center.qr.vec * i[].qr.vec).reduce_add()
+            item = (center.qr.vec * i[].qr.vec).reduce_add()
             # make a parabola around the distance to the center
-            var dot = (center.qt.vec * i[].qt.vec).reduce_add()
-            var dist = ((dot) / 2 - 1) ** 2
+            dot = (center.qt.vec * i[].qt.vec).reduce_add()
+            dist = ((dot) / 2 - 1) ** 2
             if item > 0:
                 if dist > furthest_pos_vec_dist:
                     furthest_pos_vec_dist = dist
@@ -217,19 +217,20 @@ struct Vec3D[T: DType = DType.float64]:
                     furthest_neg_vec_dist = dist
                     furthest_neg_vec = i[]
 
-        var furthest_pos_out = furthest_pos_vec.furthest(values)
-        var dist_pos = furthest_pos_vec.distance(furthest_pos_out)
-        var furthest_neg_out = furthest_neg_vec.furthest(values)
-        var dist_neg = furthest_neg_vec.distance(furthest_neg_out)
+        furthest_pos_out = furthest_pos_vec.furthest(values)
+        dist_pos = furthest_pos_vec.distance(furthest_pos_out)
+        furthest_neg_out = furthest_neg_vec.furthest(values)
+        dist_neg = furthest_neg_vec.distance(furthest_neg_out)
 
-        var direction: Quaternion[T]
+        direction: Quaternion[T]
         if dist_pos > dist_neg:
             direction = furthest_pos_vec.qt - furthest_pos_out.qt
         else:
             direction = furthest_neg_vec.qt - furthest_neg_out.qt
         direction.normalize()
 
-        var z = Vec3D(direction, center.qt)
-        var x = Vec3D(self.qr, center.qt)
-        var y = x.cross(z)
-        return x, y, z
+        return (
+            x.cross(z),
+            Vec3D(self.qr, center.qt),
+            Vec3D(direction, center.qt),
+        )
